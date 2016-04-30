@@ -9,15 +9,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stddef.h>
 #include "hdfs.h"
 
 #define KEY_SIZE 10
 #define REC_SIZE 100
 #define RECORD(data, i) (&data[(i * REC_SIZE)])
+#define BUCKET_SIZE 16
+#define NBITS 4
+#define MAX_VALUE 512
 
 /* HDFS functions */
 void read_data(hdfsFS, char *, unsigned char *, int);
 void write_data(hdfsFS, char *, unsigned char *, int);
+
+/* Defining a bucket */
+typedef struct{
+    int index;
+	unsigned char * array;
+}Bucket;
 
 /* Sort functions */
 void sort(unsigned char *, int);
@@ -25,9 +35,32 @@ void quicksort(unsigned char *, int, int);
 int partition(unsigned char *, int, int);
 int cmp_records(unsigned char *, unsigned char *);
 
+/* Bucket functions */
+void bucket_insert(Bucket *, unsigned char*);
+void init_bucket(Bucket *, int, unsigned char *);
+
 /* MPI variables */
 int nprocs;
 int rank;
+
+/* 
+ * Initialize all buckets
+ */
+void init_bucket(Bucket *b, int nrecs, unsigned char *data){
+	int i, no_bucket;
+	unsigned char temp[REC_SIZE];
+
+    for(i = 0; i < BUCKET_SIZE; i++){
+        b[i].array = (unsigned char*) malloc(sizeof(unsigned char) * nrecs * REC_SIZE);
+        b[i].index = 0;
+    }
+	for (i = 0; i < nrecs; i++){
+		memcpy(temp, RECORD(data, i), REC_SIZE);
+		no_bucket = (int) *temp >> (8 - NBITS);
+		memcpy(RECORD(b[no_bucket].array, b[no_bucket].index), temp, REC_SIZE);
+		b[no_bucket].index = b[no_bucket].index +1;
+	}
+}
 
 /*
  * Read data from HDFS. 
@@ -138,33 +171,83 @@ int main(int argc, char **argv) {
         fprintf(stderr, "nowsort <file> <nrecords>\n");
         exit(1);
     }
+	int i, j, count = 0;
     char *in_path = argv[1];
     char *out_path = "out.dat";
     int nrecs = atoi(argv[2]);
     int data_size = nrecs * REC_SIZE;
     unsigned char data[data_size];
-
+	Bucket buckets[BUCKET_SIZE];
+	int *begin, *end;
+	MPI_Status status;
+	
     /* Setup */
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+	begin = (int*)malloc(nprocs * sizeof(int));
+	end = (int*)malloc(nprocs * sizeof(int));
+	for (i = 0; i < nprocs; i++){	
+		begin[i] = i * BUCKET_SIZE/nprocs;
+		end[i] = (i + 1) * BUCKET_SIZE/nprocs - 1;
+	}
+	
     hdfsFS fs = hdfsConnect("default", 0);
     if (fs == NULL) {
         fprintf(stderr, "%d: failed to connect to HDFS\n", rank);
         MPI_Finalize();
         exit(1);
     }
+	
+	/* Read data */
+	read_data(fs, in_path, data, data_size);
+	
+    /* Initialize buckets */
+	init_bucket(buckets, nrecs, data);
+	
 
-    /* Read data */
-    read_data(fs, in_path, data, data_size);
-    
+	/* distribut data */
+	if (rank != 0){
+		for (i = begin[rank]; i <= end[rank]; i++){
+			MPI_Recv(&buckets[i].array[0], data_size, MPI_UNSIGNED_CHAR , 0, 0,MPI_COMM_WORLD, &status);
+			MPI_Recv(&buckets[i].index, 1, MPI_INT , 0, 0,MPI_COMM_WORLD, &status);
+		}
+	}else{
+		for (i = 1; i < nprocs; i++){
+			for (j = begin[i]; j <= end[i]; j++){
+				MPI_Send(&buckets[j].array[0], data_size, MPI_UNSIGNED_CHAR , i, 0,MPI_COMM_WORLD);
+				MPI_Send(&buckets[j].index, 1, MPI_INT , i, 0,MPI_COMM_WORLD);
+			}
+		}
+	}
+
     /* Sort data */
-    sort(data, nrecs);
-
-    /* Write data */
-    write_data(fs, out_path, data, data_size);
-
+	for (i = begin[rank]; i<= end[rank]; i++)
+		sort(buckets[i].array, buckets[i].index);
+	
+	/* Gather the data*/
+	if (rank != 0){
+		for (i = begin[rank]; i <= end[rank]; i++){
+			MPI_Send(&buckets[i].array[0], data_size, MPI_UNSIGNED_CHAR , 0, 0,MPI_COMM_WORLD);
+			MPI_Send(&buckets[i].index, 1, MPI_INT , 0, 0,MPI_COMM_WORLD);
+		}
+	}else{
+		for (i = 1; i < nprocs; i++){
+			for (j = begin[i]; j <= end[i]; j++){
+				MPI_Recv(&buckets[j].array[0], data_size, MPI_UNSIGNED_CHAR , i, 0,MPI_COMM_WORLD, &status);
+				MPI_Recv(&buckets[j].index, 1, MPI_INT , i, 0,MPI_COMM_WORLD, &status);
+			}
+		}
+	}
+	
+	if (rank == 0){
+		 for (i = 0; i< BUCKET_SIZE; i++){
+			memcpy(RECORD(data, count), RECORD(buckets[i].array, 0), REC_SIZE * buckets[i].index);
+			count += buckets[i].index;
+		}
+		/* Write data */
+		write_data(fs, out_path, data, data_size);
+	}
     /* Cleanup */
     MPI_Finalize();
 
