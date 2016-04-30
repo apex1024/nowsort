@@ -5,3 +5,4 @@ setenv HDFS_HOME ${HADOOP_HOME}/lib/native
 setenv PATH ${HADOOP_HOME}/bin:${PATH}
 setenv LD_LIBRARY_PATH ${HDFS_JAVA}:${HDFS_HOME}:${LD_LIBRARY_PATH}
 setenv CLASSPATH "`hadoop classpath --glob`"
+setenv MP_EAGER_LIMIT 4294967295
