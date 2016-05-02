@@ -9,7 +9,9 @@
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -59,7 +61,8 @@ public class Nowsort {
 
     /*
      * SortReducer
-     *   Sorts each bucket by comparing the 10-byte keys.
+     *   Sorts each bucket with a priority queue by comparing the 10-byte keys. Requires that a 
+     *   bucket fit into memory.
      *   in:  bucket => records
      *   out: null => record
      */
@@ -67,65 +70,46 @@ public class Nowsort {
             extends Reducer<LongWritable, BytesWritable, NullWritable, Text> {
         NullWritable outKey = NullWritable.get();
         Text outRecord = new Text();
+        RecordComparator comp = new RecordComparator();
 
         public void reduce(LongWritable bucket, Iterable<BytesWritable> records, Context context)
                 throws IOException, InterruptedException {
-            ArrayList<byte[]> sortedRecords = new ArrayList<>();
+            PriorityQueue<byte[]> sortedRecords = new PriorityQueue<>(comp);
 
             /* Copy records */
             for (BytesWritable record : records) {
                 sortedRecords.add(record.copyBytes());
             }
 
-            /* Sort records */
-            sort(sortedRecords);
-
             /* Output sorted records */
-            for (byte[] record : sortedRecords) {
+            while (!sortedRecords.isEmpty()) {
                 /* Convert binary to text */
-                outRecord.set(record);
+                outRecord.set(sortedRecords.poll());
                 context.write(outKey, outRecord);
             }
-        } 
+        }
 
         /*
-         * compareRec()
+         * RecordComparator
          *   Compares the keys of two records byte-by-byte and returns -1, 1, or 0 if rec1 is 
          *   correspondingly less than, greater than, or equal to rec2.
          */
-        private int compareRec(byte[] rec1, byte[] rec2) {
-            for (int i = 0; i < KEY_SIZE; i++) {
-                /* Have to cast to int because bytes are signed in Java */
-                int k1 = (int) (rec1[i] & 0xFF);
-                int k2 = (int) (rec2[i] & 0xFF);
+        private static class RecordComparator implements Comparator<byte[]> {
+            public int compare(byte[] rec1, byte[] rec2) {
+                for (int i = 0; i < KEY_SIZE; i++) {
+                    /* Have to cast to int because bytes are signed in Java */
+                    int k1 = (int) (rec1[i] & 0xFF);
+                    int k2 = (int) (rec2[i] & 0xFF);
 
-                if (k1 < k2) {
-                    return -1;
-                }
-                else if (k1 > k2) {
-                    return 1;
-                }
-            }
-
-            return 0;
-        }
-        
-        /*
-         * sort()
-         *   Sorts a list of records by their keys using insertion sort.
-         */
-        private void sort(ArrayList<byte[]> records) {
-            for (int i = 0; i < records.size(); i++) {
-                for (int j = i; j > 0; j--) {
-                    if (compareRec(records.get(j - 1), records.get(j)) > 0) {
-                        byte[] tmp = records.get(j - 1);
-                        records.set(j - 1, records.get(j));
-                        records.set(j, tmp);
+                    if (k1 < k2) {
+                        return -1;
                     }
-                    else {
-                        break;
+                    else if (k1 > k2) {
+                        return 1;
                     }
                 }
+
+                return 0;
             }
         }
     }
@@ -181,6 +165,8 @@ public class Nowsort {
         Configuration conf = new Configuration();
         conf.setInt(FixedLengthInputFormat.FIXED_RECORD_LENGTH, REC_SIZE);
         conf.setInt("nBits", nBits);
+        conf.setInt("mapreduce.map.memory.mb", 8192);
+        conf.setInt("mapreduce.reduce.memory.mb", 8192);
 
         Job job = Job.getInstance(conf, "nowsort");
         job.setJarByClass(Nowsort.class);
@@ -198,8 +184,8 @@ public class Nowsort {
         FileInputFormat.addInputPath(job, inPath);
         FileOutputFormat.setOutputPath(job, outPath);
 
-        //FileInputFormat.setMaxInputSplitSize(job, /* splitsize */);
-        // TODO: may need to make another pass to combine files, or just use -getmerge
+        int blocksize = 128 * (1 << 20); // 128 MB
+        FileInputFormat.setMaxInputSplitSize(job, blocksize);
         job.setNumReduceTasks(nBuckets);
 
         job.waitForCompletion(true);
