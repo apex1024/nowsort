@@ -1,0 +1,4 @@
+#!/bin/sh
+
+mpirun -np 10 ./radix -n 100 -i inputs/100a.in -o inputs/100a.out
+#inputs/valsort inputs/100a.out
