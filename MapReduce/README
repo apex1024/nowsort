@@ -1,0 +1,9 @@
+Authors: Wolf Honore, Victor Liu, Ka Wo Hong
+Assignment: CSC 258 Project (Spring 2016)
+
+Compile with 'ant'.
+Run with 'hadoop jar build/Hadoop.jar Nowsort <in data> <out directory> <nbits>
+Data will be sorted into 2^nbits files in <out directory>.
+To concatenate files onto local disk, use 'hadoop fs -getmerge <out directory> <local>'.
+
+Consult the comments for implementation details.
