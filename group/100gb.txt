@@ -1,0 +1,23 @@
+Hello from cycle2.csug.rochester.edu, tid 4
+Hello from cycle2.csug.rochester.edu, tid 0
+Hello from cycle1.csug.rochester.edu, tid 1
+Hello from node2x14a.csug.rochester.edu, tid 3
+Hello from cycle1.csug.rochester.edu, tid 5
+Hello from cycle3.csug.rochester.edu, tid 2
+Hello from cycle3.csug.rochester.edu, tid 6
+Memory allocation complete (9.892199 seconds)
+
+===================================================================================
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
+=   EXIT CODE: 139
+=   CLEANING UP REMAINING PROCESSES
+=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
+===================================================================================
+Hello from cycle2.csug.rochester.edu, tid 0
+Hello from cycle2.csug.rochester.edu, tid 4
+Hello from node2x14a.csug.rochester.edu, tid 3
+Hello from cycle1.csug.rochester.edu, tid 1
+Hello from cycle3.csug.rochester.edu, tid 2
+Hello from cycle1.csug.rochester.edu, tid 5
+Hello from cycle3.csug.rochester.edu, tid 6
+Memory allocation complete (9.373900 seconds)

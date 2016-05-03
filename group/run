@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Note: -np MUST be 7
+# The -n parameter must correspond with the total number of records in the input file, -i
+
+mpirun -np 7 -machinefile hosts ./radix -n 10000000 -i /user/whonore/1gb.dat -o /user/vliu5/1gb.out > 1gb.txt
+mpirun -np 7 -machinefile hosts ./radix -n 10000000 -i /user/whonore/1gb.dat -o /user/vliu5/1gb.out >> 1gb.txt
+mpirun -np 7 -machinefile hosts ./radix -n 100000000 -i /user/whonore/10gb.dat -o /user/vliu5/10gb.out > 10gb.txt
+mpirun -np 7 -machinefile hosts ./radix -n 100000000 -i /user/whonore/10gb.dat -o /user/vliu5/10gb.out >> 10gb.txt
+mpirun -np 7 -machinefile hosts ./radix -n 1000000000 -i /user/whonore/100gb.dat -o /user/vliu5/100gb.out > 100gb.txt
+mpirun -np 7 -machinefile hosts ./radix -n 1000000000 -i /user/whonore/100gb.dat -o /user/vliu5/100gb.out >> 100gb.txt

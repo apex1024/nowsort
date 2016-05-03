@@ -1,0 +1,48 @@
+Hello from cycle2.csug.rochester.edu, tid 0
+Hello from cycle2.csug.rochester.edu, tid 4
+Hello from cycle1.csug.rochester.edu, tid 1
+Hello from cycle1.csug.rochester.edu, tid 5
+Hello from cycle3.csug.rochester.edu, tid 2
+Hello from node2x14a.csug.rochester.edu, tid 3
+Hello from cycle3.csug.rochester.edu, tid 6
+Memory allocation complete (5.042928 seconds)
+Chunk size: 333333334
+Chunk size: 333333334
+Chunk size: 333333334
+Thread 4 listening complete (121.785008 seconds)
+Thread 5 listening complete (121.785049 seconds)
+Thread 6 listening complete (121.784369 seconds)
+Thread 3 listening complete (121.806119 seconds)
+Thread 6 sorting complete (12.550980 seconds)
+Thread 6 writing complete (4.539866 seconds)
+Thread 4 sorting complete (17.403217 seconds)
+Thread 4 writing complete (6.305569 seconds)
+Thread 5 sorting complete (27.485995 seconds)
+Thread 5 writing complete (8.204109 seconds)
+Thread 3 sorting complete (41.497776 seconds)
+Thread 3 writing complete (100.268936 seconds)
+Total app time: 268.615948 seconds
+Hello from cycle2.csug.rochester.edu, tid 0
+Hello from cycle2.csug.rochester.edu, tid 4
+Hello from node2x14a.csug.rochester.edu, tid 3
+Hello from cycle1.csug.rochester.edu, tid 1
+Hello from cycle3.csug.rochester.edu, tid 2
+Hello from cycle1.csug.rochester.edu, tid 5
+Hello from cycle3.csug.rochester.edu, tid 6
+Memory allocation complete (5.899210 seconds)
+Chunk size: 333333334
+Chunk size: 333333334
+Chunk size: 333333334
+Thread 4 listening complete (121.832532 seconds)
+Thread 5 listening complete (121.834439 seconds)
+Thread 6 listening complete (121.833879 seconds)
+Thread 3 listening complete (121.867443 seconds)
+Thread 6 sorting complete (12.582078 seconds)
+Thread 6 writing complete (4.944247 seconds)
+Thread 4 sorting complete (18.739761 seconds)
+Thread 4 writing complete (6.439798 seconds)
+Thread 5 sorting complete (28.934492 seconds)
+Thread 5 writing complete (8.457127 seconds)
+Thread 3 sorting complete (41.521490 seconds)
+Thread 3 writing complete (93.976386 seconds)
+Total app time: 263.261557 seconds

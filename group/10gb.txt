@@ -1,0 +1,42 @@
+Hello from cycle2.csug.rochester.edu, tid 0
+Hello from cycle2.csug.rochester.edu, tid 4
+Hello from cycle1.csug.rochester.edu, tid 1
+Hello from cycle3.csug.rochester.edu, tid 2
+Hello from node2x14a.csug.rochester.edu, tid 3
+Hello from cycle1.csug.rochester.edu, tid 5
+Hello from cycle3.csug.rochester.edu, tid 6
+Memory allocation complete (9.021844 seconds)
+Thread 4 listening complete (1205.251912 seconds)
+Thread 6 listening complete (1205.253785 seconds)
+Thread 5 listening complete (1205.254871 seconds)
+Thread 3 listening complete (1205.267762 seconds)
+Thread 6 sorting complete (1225.962744 seconds)
+Thread 6 writing complete (32.441473 seconds)
+Thread 4 sorting complete (1742.557978 seconds)
+Thread 4 writing complete (50.972316 seconds)
+Thread 5 sorting complete (2773.149218 seconds)
+Thread 5 writing complete (63.795711 seconds)
+Thread 3 sorting complete (4264.923495 seconds)
+Thread 3 writing complete (894.850382 seconds)
+Total app time: 6374.063172 seconds
+Hello from cycle2.csug.rochester.edu, tid 0
+Hello from cycle2.csug.rochester.edu, tid 4
+Hello from node2x14a.csug.rochester.edu, tid 3
+Hello from cycle3.csug.rochester.edu, tid 2
+Hello from cycle1.csug.rochester.edu, tid 5
+Hello from cycle3.csug.rochester.edu, tid 6
+Hello from cycle1.csug.rochester.edu, tid 1
+Memory allocation complete (16.284044 seconds)
+Thread 4 listening complete (1207.041198 seconds)
+Thread 5 listening complete (1207.041996 seconds)
+Thread 3 listening complete (1207.063863 seconds)
+Thread 6 listening complete (1207.040778 seconds)
+Thread 6 sorting complete (1280.116928 seconds)
+Thread 6 writing complete (36.639903 seconds)
+Thread 4 sorting complete (1784.404238 seconds)
+Thread 4 writing complete (52.107175 seconds)
+Thread 5 sorting complete (2890.624431 seconds)
+Thread 5 writing complete (72.967454 seconds)
+Thread 3 sorting complete (4264.106753 seconds)
+Thread 3 writing complete (913.311896 seconds)
+Total app time: 6400.766771 seconds
